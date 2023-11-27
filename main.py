@@ -36,9 +36,9 @@ def get_transcript(url):
 
     clear_dir('temp_dir')
     
-    download.download_and_convert_audio(url, get_folder('temp_dir'))
+    audio = download.download_and_convert_audio(url, get_folder('temp_dir'), name)
 
-    transcript = transcribe.transcribe_large_audio(os.path.join(get_folder('temp_dir'), f'{name}.wav'))
+    transcript = transcribe.transcribe_large_audio(audio, temp_path=get_folder('temp_dir'))
 
     clear_dir('temp_dir')
 

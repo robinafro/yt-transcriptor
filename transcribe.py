@@ -26,7 +26,7 @@ def transcribe_large_audio(audio_file_path, temp_path="", chunk_duration_ms=6000
             chunk_audio_data = recognizer.record(chunk_audio_file)
 
         try:
-            print(f"{Fore.YELLOW}Transcribing chunk {i + 1} of {num_chunks}...{Fore.RESET}")
+            print(f"{Fore.BLUE}Transcribing chunk {i + 1} of {num_chunks}...{Fore.RESET}")
             
             text = recognizer.recognize_google(chunk_audio_data, language="cs-CZ")
             transcriptions.append(text)
