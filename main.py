@@ -23,6 +23,14 @@ DEFAULT_NAMES = {
     "temp_dir": "temp",
 }
 
+def is_valid_path(path):
+    try:
+        # Check if the path is valid for both Unix and Windows
+        os.path.normpath(path)
+        return True
+    except (ValueError, TypeError):
+        return False
+    
 def get_folder(name):
     return os.path.join(USER, config.get(name, DEFAULT_NAMES[name]))
 
@@ -46,12 +54,38 @@ def clear_dir(dir):
     for file in os.listdir(get_folder(dir)):
         os.remove(os.path.join(get_folder(dir), file))
 
-def get_transcript(url, language):
-    name = url.split('=')[1]
+def get_transcript(url_or_path, language):
+    is_url = False
+
+    if url_or_path.startswith('http'):
+        url = url_or_path
+        is_url = True
+    elif is_valid_path(url_or_path):
+        if not os.path.exists(url_or_path):
+            raise Exception("Invalid path. File does not exist.")
+        
+        if not url_or_path.endswith('.wav'):
+            raise Exception("Invalid path. File must be a .wav file.")
+
+        url = os.path.abspath(url_or_path)
+    else:
+        raise Exception("Invalid URL or path. If this is a path, make sure it is absolute.")
+    
+    if url.startswith('http'):
+        name = url.split('=')[1]
+
+        if '&' in name:
+            name = name.split('&')[0]
+            url = url.split('&')[0]
+    else:
+        name = os.path.basename(url).split('.')[0]
 
     clear_dir('temp_dir')
     
-    audio = download.download_and_convert_audio(url, get_folder('temp_dir'), name)
+    if is_url:
+        audio = download.download_and_convert_audio(url, get_folder('temp_dir'), name)
+    else:
+        audio = url
 
     transcript = transcribe.transcribe_large_audio(audio, temp_path=get_folder('temp_dir'), language=language)
 
@@ -89,8 +123,8 @@ if __name__ == "__main__":
     initialize_folders()
 
     if ARG is not None:
-        if ARG.startswith('http'):
-            language = None
+        if ARG.startswith('http') or ARG.startswith('/') or ARG.startswith('\\') or ARG.startswith('C:'):
+            language = config["default_lang"]
 
             for arg in sys.argv:
                 if arg.startswith('lang='):
@@ -107,5 +141,10 @@ if __name__ == "__main__":
                 raise Exception("Missing argument: transcript name")
             
             open_transcript(sys.argv[2])
+        elif ARG == 'list':
+            print(f"{Fore.BLUE}Listing transcripts...{Fore.RESET}")
+
+            for file in os.listdir(get_folder('output_dir')):
+                print(f"{Fore.GREEN}{file.split('.')[0]}{Fore.RESET}")
         elif ARG == 'clear':
             clear_dir('output_dir')
