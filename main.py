@@ -1,7 +1,7 @@
 import os, sys, json, subprocess
 
-from . import download
-from . import transcribe
+import download
+import transcribe
 
 config = json.load(open('config.json'))
 
