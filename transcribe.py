@@ -4,7 +4,7 @@ from colorama import Fore
 
 import os
 
-def transcribe_large_audio(audio_file_path, temp_path="", chunk_duration_ms=60000):
+def transcribe_large_audio(audio_file_path, temp_path="", language="cs-CZ", chunk_duration_ms=60000):
     temp_chunk = os.path.join(temp_path, "temp_chunk.wav")
 
     recognizer = sr.Recognizer()
@@ -28,7 +28,7 @@ def transcribe_large_audio(audio_file_path, temp_path="", chunk_duration_ms=6000
         try:
             print(f"{Fore.BLUE}Transcribing chunk {i + 1} of {num_chunks}...{Fore.RESET}")
             
-            text = recognizer.recognize_google(chunk_audio_data, language="cs-CZ")
+            text = recognizer.recognize_google(chunk_audio_data, language=language)
             transcriptions.append(text)
 
         except sr.UnknownValueError:
