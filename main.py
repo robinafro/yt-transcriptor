@@ -71,7 +71,9 @@ if __name__ == "__main__":
             name, transcript = get_transcript(ARG)
 
             save_transcript(name, transcript)
-            open_transcript(name)
+
+            if len(sys.argv) > 2 and sys.argv[2] == 'open':
+                open_transcript(name)
         elif ARG == 'open':
             if len(sys.argv) < 3:
                 raise Exception("Missing argument: transcript name")
