@@ -1,5 +1,5 @@
 {
-    "main_dir": ".kafka_transcriptor",
-    "temp_dir": ".kafka_transcriptor\\temp",
-    "output_dir": ".kafka_transcriptor\\output"
+    "main_dir": ".yt_transcriptor",
+    "temp_dir": ".yt_transcriptor\\temp",
+    "output_dir": ".yt_transcriptor\\output"
 }
