@@ -1,9 +1,13 @@
-import os, sys, json, subprocess
+import os, sys, json
 
-import download
-import transcribe
+try:
+    import download
+    import transcribe
 
-from colorama import Fore
+    from colorama import Fore
+except ImportError:
+    print("Missing dependencies. Please run `pip install -r requirements.txt` to install them.")
+    exit(1)
 
 if not os.path.exists('config.json'):
     raise Exception("Config file not found.")
