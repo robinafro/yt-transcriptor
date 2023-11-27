@@ -5,6 +5,9 @@ import transcribe
 
 from colorama import Fore
 
+if not os.path.exists('config.json'):
+    raise Exception("Config file not found.")
+
 config = json.load(open('config.json'))
 
 USER = os.path.expanduser("~")

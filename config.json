@@ -1,5 +1,6 @@
 {
     "main_dir": ".yt_transcriptor",
     "temp_dir": ".yt_transcriptor\\temp",
-    "output_dir": ".yt_transcriptor\\output"
+    "output_dir": ".yt_transcriptor\\output",
+    "default_lang": "cs-CZ"
 }

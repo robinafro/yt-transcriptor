@@ -2,9 +2,11 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from colorama import Fore
 
-import os
+import os, json
 
-def transcribe_large_audio(audio_file_path, temp_path="", language="cs-CZ", chunk_duration_ms=60000):
+config = json.load(open('config.json'))
+
+def transcribe_large_audio(audio_file_path, temp_path="", language=config["default_lang"], chunk_duration_ms=60000):
     temp_chunk = os.path.join(temp_path, "temp_chunk.wav")
 
     recognizer = sr.Recognizer()
