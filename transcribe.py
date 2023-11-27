@@ -1,45 +1,42 @@
 import speech_recognition as sr
 from pydub import AudioSegment
+from colorama import Fore
 
-def transcribe_large_audio(audio_file_path, chunk_duration_ms=60000):
+import os
+
+def transcribe_large_audio(audio_file_path, temp_path="", chunk_duration_ms=60000):
+    temp_chunk = os.path.join(temp_path, "temp_chunk.wav")
+
     recognizer = sr.Recognizer()
-
-    # Load the audio file using pydub
     audio = AudioSegment.from_wav(audio_file_path)
 
-    # Calculate the number of chunks based on the specified duration
     num_chunks = len(audio) // chunk_duration_ms + 1
 
     transcriptions = []
 
     for i in range(num_chunks):
-        # Calculate start and end time for each chunk
         start_time = i * chunk_duration_ms
         end_time = (i + 1) * chunk_duration_ms
 
-        # Extract the chunk
         chunk = audio[start_time:end_time]
 
-        # Export the chunk to a temporary WAV file
-        chunk.export("temp_chunk.wav", format="wav")
+        chunk.export(temp_chunk, format="wav")
 
-        # Convert each chunk to audio data
-        with sr.AudioFile("temp_chunk.wav") as chunk_audio_file:
+        with sr.AudioFile(temp_chunk) as chunk_audio_file:
             chunk_audio_data = recognizer.record(chunk_audio_file)
 
         try:
-            print("Transcribing chunk {}.".format(i))
-            # Use Google Web Speech API for transcription
+            print(f"{Fore.YELLOW}Transcribing chunk {i + 1} of {num_chunks}...{Fore.RESET}")
+            
             text = recognizer.recognize_google(chunk_audio_data, language="cs-CZ")
             transcriptions.append(text)
 
         except sr.UnknownValueError:
-            print("Speech Recognition could not understand chunk {}.".format(i))
+            print(f"{Fore.YELLOW}Speech Recognition could not understand chunk {i + 1}.{Fore.RESET}")
         except sr.RequestError as e:
-            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            print(f"{Fore.RED}Could not request results from Speech Recognition service; {e}{Fore.RESET}")
 
-    # Print the combined transcript
-    print("Transcript: {}".format(" ".join(transcriptions)))
+    if os.path.exists(temp_chunk):
+        os.remove(temp_chunk)
 
-# Example usage
-transcribe_large_audio("C:/Users/actul/.kafka_transcriptor/output_audio.wav")
+    return "{}".format(" ".join(transcriptions))

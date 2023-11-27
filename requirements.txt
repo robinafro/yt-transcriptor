@@ -2,3 +2,4 @@ pytube
 moviepy
 SpeechRecognition
 pydub
+colorama
