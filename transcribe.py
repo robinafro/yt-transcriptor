@@ -42,4 +42,4 @@ def transcribe_large_audio(audio_file_path, chunk_duration_ms=60000):
     print("Transcript: {}".format(" ".join(transcriptions)))
 
 # Example usage
-transcribe_large_audio("C:/Users/actul/Documents/TEST/output_audio.wav")
+transcribe_large_audio("C:/Users/actul/.kafka_transcriptor/output_audio.wav")

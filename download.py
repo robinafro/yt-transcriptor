@@ -2,6 +2,9 @@ from pytube import YouTube
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import os
 
+if not os.path.exists("C:/Users/actul/.kafka-transcriptor"):
+    os.mkdir("C:/Users/actul/.kafka-transcriptor")
+
 def download_and_convert_audio(youtube_url, output_path, output_format="wav"):
     # Download YouTube video
     youtube = YouTube(youtube_url)
@@ -19,6 +22,6 @@ def download_and_convert_audio(youtube_url, output_path, output_format="wav"):
     os.remove(f"{output_path}/temp_video.{output_format}")
 
 # Example usage
-youtube_url = "https://www.youtube.com/watch?v=vXYzoFJOS1U"
-output_path = "C:/Users/actul/Documents/TEST"
+youtube_url = "https://www.youtube.com/watch?v=MyvPOSLrzG0"
+output_path = f"C:/Users/actul/.kafka_transcriptor/"
 download_and_convert_audio(youtube_url, output_path)
