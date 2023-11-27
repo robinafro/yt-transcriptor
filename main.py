@@ -65,6 +65,8 @@ def save_transcript(name, transcript):
             f.write(cleaned_transcript)
         print(f"{Fore.YELLOW}Warning: UnicodeEncodeError occurred. Problematic characters replaced in {file_path}. Error: {e}{Fore.RESET}")
 
+    print(f"{Fore.GREEN}Successfully saved transcript to {file_path}{Fore.RESET}")
+
 def open_transcript(name):
     if os.name == 'posix':
         editor_cmd = 'xdg-open'
