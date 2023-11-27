@@ -3,6 +3,8 @@ import os, sys, json, subprocess
 import download
 import transcribe
 
+from colorama import Fore
+
 config = json.load(open('config.json'))
 
 USER = os.path.expanduser("~")
@@ -19,12 +21,18 @@ def get_folder(name):
 
 def initialize_folders():
     if not os.path.exists(get_folder('main_dir')):
+        print(f"{Fore.BLUE}Initializing folders...{Fore.RESET}")
+
         os.mkdir(get_folder('main_dir'))
 
     if not os.path.exists(get_folder('output_dir')):
+        print(f"{Fore.BLUE}Restoring folder {get_folder('output_dir')}...{Fore.RESET}")
+
         os.mkdir(get_folder('output_dir'))
 
     if not os.path.exists(get_folder('temp_dir')):
+        print(f"{Fore.BLUE}Restoring folder {get_folder('temp_dir')}...{Fore.RESET}")
+
         os.mkdir(get_folder('temp_dir'))
 
 def clear_dir(dir):
@@ -45,8 +53,17 @@ def get_transcript(url):
     return name, transcript
 
 def save_transcript(name, transcript):
-    with open(os.path.join(get_folder('output_dir'), f'{name}.txt'), 'w') as f:
-        f.write(transcript)
+    file_path = os.path.join(get_folder('output_dir'), f'{name}.txt')
+
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(transcript)
+    except UnicodeEncodeError as e:
+        # Handle the exception by replacing problematic characters
+        cleaned_transcript = ''.join(c if ord(c) < 128 else '?' for c in transcript)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(cleaned_transcript)
+        print(f"{Fore.YELLOW}Warning: UnicodeEncodeError occurred. Problematic characters replaced in {file_path}. Error: {e}{Fore.RESET}")
 
 def open_transcript(name):
     if os.name == 'posix':
