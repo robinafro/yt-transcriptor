@@ -3,6 +3,7 @@ import os, sys, json
 try:
     import download
     import transcribe
+    import textwrap
 
     from colorama import Fore
 except ImportError:
@@ -93,7 +94,13 @@ def get_transcript(url_or_path, language):
 
     return name, transcript
 
-def save_transcript(name, transcript):
+def format_transcript(transcript):
+    return textwrap.fill(transcript, width=140)
+
+def save_transcript(name, transcript, format=False):
+    if format:
+        transcript = format_transcript(transcript)
+
     file_path = os.path.join(get_folder('output_dir'), f'{name}.txt')
 
     try:
