@@ -3,6 +3,8 @@ import os, sys, json
 try:
     import download
     import transcribe
+    import answer
+
     import textwrap
 
     from colorama import Fore
@@ -57,7 +59,56 @@ def clear_dir(dir):
     for file in os.listdir(get_folder(dir)):
         os.remove(os.path.join(get_folder(dir), file))
 
-def get_transcript(url_or_path, language):
+def save_transcript(name, transcript, format=False):
+    if format:
+        transcript = format_transcript(transcript)
+
+    file_path = os.path.join(get_folder('output_dir'), f'{name}.txt')
+
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(transcript)
+    except UnicodeEncodeError as e:
+        # Handle the exception by replacing problematic characters
+        cleaned_transcript = ''.join(c if ord(c) < 128 else '?' for c in transcript)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(cleaned_transcript)
+        print(f"{Fore.YELLOW}Warning: UnicodeEncodeError occurred. Problematic characters replaced in {file_path}. Error: {e}{Fore.RESET}")
+
+    print(f"{Fore.GREEN}Successfully saved transcript to {file_path}{Fore.RESET}")
+
+def open_transcript(name, only_return=False):
+    file_path = os.path.join(get_folder('output_dir'), f'{name}.txt')
+
+    if not os.path.exists(file_path):
+        if not only_return:
+            raise Exception(f"Transcript {name} does not exist.")
+        else:
+            return None
+    
+    if not os.path.isfile(file_path):
+        raise Exception(f"Transcript {name} is not a file.")
+
+    if only_return:
+        return open(file_path, 'r', encoding='utf-8').read()
+    else:
+        os.startfile(file_path)
+
+def get_transcript(url_or_path, language, return_if_exists=False):
+    existing_name = ""
+
+    if url_or_path.startswith('http'):
+        existing_name = url_or_path.split('=')[1]
+    elif is_valid_path(url_or_path):
+        existing_name = os.path.basename(url_or_path).split('.')[0]
+    else:
+        existing_name = url_or_path
+    
+    existing_transcript = open_transcript(existing_name, only_return=True)
+
+    if existing_transcript is not None and return_if_exists:
+        return existing_name, existing_transcript
+
     is_url = False
 
     if url_or_path.startswith('http'):
@@ -99,52 +150,41 @@ def get_transcript(url_or_path, language):
 def format_transcript(transcript):
     return textwrap.fill(transcript, width=140)
 
-def save_transcript(name, transcript, format=False):
-    if format:
-        transcript = format_transcript(transcript)
-
-    file_path = os.path.join(get_folder('output_dir'), f'{name}.txt')
-
-    try:
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(transcript)
-    except UnicodeEncodeError as e:
-        # Handle the exception by replacing problematic characters
-        cleaned_transcript = ''.join(c if ord(c) < 128 else '?' for c in transcript)
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(cleaned_transcript)
-        print(f"{Fore.YELLOW}Warning: UnicodeEncodeError occurred. Problematic characters replaced in {file_path}. Error: {e}{Fore.RESET}")
-
-    print(f"{Fore.GREEN}Successfully saved transcript to {file_path}{Fore.RESET}")
-
-def open_transcript(name):
-    file_path = os.path.join(get_folder('output_dir'), f'{name}.txt')
-
-    if not os.path.exists(file_path):
-        raise Exception(f"Transcript {name} does not exist.")
-    
-    if not os.path.isfile(file_path):
-        raise Exception(f"Transcript {name} is not a file.")
-
-    os.startfile(file_path)
-
 if __name__ == "__main__":
     initialize_folders()
 
     if ARG is not None:
-        if ARG.startswith('http') or ARG.startswith('/') or ARG.startswith('\\') or ARG.startswith('C:'):
+        if ARG.startswith('http') or ARG.startswith('/') or ARG.startswith('\\') or ARG.startswith('C:') or "answer" in sys.argv:
             language = config["default_lang"]
 
             for arg in sys.argv:
                 if arg.startswith('lang='):
                     language = arg.split('=')[1]
-
-            name, transcript = get_transcript(ARG, language)
+            
+            name, transcript = get_transcript(ARG, language, return_if_exists=("answer" in sys.argv))
 
             save_transcript(name, transcript)
 
+            if "answer" in sys.argv:
+                if transcript is None:
+                    raise Exception("Failed to get (not generate) transcript. If this issue persists, try deleting the existing transcript files.")
+                
+                questions_path = None
+
+                for arg in sys.argv:
+                    if arg.startswith('questions='):
+                        questions_path = arg.split('=')[1]
+                
+                answer.chatbot(questions_path, os.path.join(get_folder('output_dir'), f'{name}.txt'), os.path.join(get_folder('output_dir'), f'{name}_answers.txt'), youtube_url=ARG)
+
             if "open" in sys.argv:
-                open_transcript(name)
+                if "answer" in sys.argv:
+                    try:
+                        open_transcript(f'{name}_answers')
+                    except:
+                        raise Exception("Failed to open answers.")  
+                else:
+                    open_transcript(name)
         elif ARG == 'open':
             if len(sys.argv) < 3:
                 raise Exception("Missing argument: transcript name")
