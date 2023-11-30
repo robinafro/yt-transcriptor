@@ -10,10 +10,12 @@ except ImportError:
     print("Missing dependencies. Please run `pip install -r requirements.txt` to install them.")
     exit(1)
 
-if not os.path.exists('config.json'):
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
+
+if not os.path.exists(config_path):
     raise Exception("Config file not found.")
 
-config = json.load(open('config.json'))
+config = json.load(open(config_path))
 
 USER = os.path.expanduser("~")
 ARG = sys.argv[1] if len(sys.argv) > 1 else None
@@ -68,7 +70,7 @@ def get_transcript(url_or_path, language):
         if not url_or_path.endswith('.wav'):
             raise Exception("Invalid path. File must be a .wav file.")
 
-        url = os.path.abspath(url_or_path)
+        url = os.path.join(os.path.dirname(os.path.abspath(__file__)), url_or_path)
     else:
         raise Exception("Invalid URL or path. If this is a path, make sure it is absolute.")
     

@@ -4,7 +4,13 @@ from colorama import Fore
 
 import os, json
 
-config = json.load(open('config.json'))
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
+
+if not os.path.exists(config_path):
+    raise Exception("Config file not found.")
+
+config = json.load(open(config_path))
+
 
 def transcribe_large_audio(audio_file_path, temp_path="", language=config["default_lang"], chunk_duration_ms=60000):
     temp_chunk = os.path.join(temp_path, "temp_chunk.wav")
