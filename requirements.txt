@@ -3,3 +3,5 @@ moviepy
 SpeechRecognition
 pydub
 colorama
+openai
+python-dotenv
